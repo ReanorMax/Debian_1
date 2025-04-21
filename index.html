@@ -1,0 +1,2692 @@
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width-device-width, initial-scale=1.0">
+  <title>Установка Debian с RAID и LUKS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav>
+    <div class="logo">
+      <svg width="40" height="40" viewBox="0 0 100 100">
+        <path d="M50 5 L95 95 L5 95 Z" fill="none" stroke="#ff4081" stroke-width="5"/>
+        <circle cx="50" cy="50" r="20" fill="none" stroke="#ff4081" stroke-width="5"/>
+      </svg>
+      <span>Сфера Телеком</span>
+    </div>
+    <ul class="nav-links">
+      <li class="active" data-section="disks">Диски и RAID</li>
+      <li data-section="encryption">Шифрование</li>
+      <li data-section="installation">Установка</li>
+      <li data-section="system">О системе</li>
+      <li data-section="check">Проверка настроек</li>
+      <li data-section="instructions">Инструкции по настройке</li>
+      <li data-section="bios">Настройка BIOS</li>
+    </ul>
+  </nav>
+
+  <main>
+    <div class="hero">
+      <h1>Установка Debian с RAID и шифрованием LUKS</h1>
+     
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Tux.png" alt="Linux Penguin" style="width: 200px; height: auto; margin-top: 1rem;">
+    </div>
+
+    <section id="disks" class="active-section">
+      <h2>Структура дисков и RAID</h2>
+      
+      <div class="section-container">
+        <h3 class="section-title">Физические диски</h3>
+        <div class="disk-grid">
+          <div class="disk-card">
+            
+            <div class="disks">
+                <div class="disk-row">
+                  <div class="disk-icon active" style="background-color: #e65100;"></div>
+                </div>
+                
+              </div>
+            <h3>sda (/store)</h3>
+            <p>3.6T</p>
+            <p>RAID10 LSI (Ext4)</p>
+            <p>PostgreSQL и Zabbix</p>
+          </div>
+
+          <div class="disk-card">
+           
+           <div class="disks">
+                <div class="disk-row">
+                  <div class="disk-icon active" style="background-color: #f06292;"></div>
+                </div>
+               
+              </div>
+            <h3>sdb</h3>
+            <p>223.6G</p>
+            <p>Запасной SSD</p>
+          </div>
+
+          <div class="disk-card">
+            
+             <div class="disks">
+                <div class="disk-row">
+                  <div class="disk-icon active" style="background-color: #4caf50;"></div>
+                </div>
+               
+              </div>
+            <h3>sdc</h3>
+            <p>223.6G</p>
+            <p>Активный SSD</p>
+          </div>
+
+          <div class="disk-card">
+           
+            <div class="disks">
+                <div class="disk-row">
+                  <div class="disk-icon active" style="background-color: #4caf50;"></div>
+                </div>
+                
+              </div>
+            <h3>sdd</h3>
+            <p>223.6G</p>
+            <p>Активный SSD</p>
+          </div>
+        </div>
+
+        <h3 class="section-title">Программные RAID массивы</h3>
+        <div class="raid-grid">
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#ff9800" d="M2,2V22H22V2H2M20,20H4V4H20V20M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
+              </svg>
+            </div>
+            <h3>md0 (RAID1)</h3>
+            <p class="raid-title">Корневой раздел (/)</p>
+            <p class="raid-size">74.4G</p>
+            <div class="raid-members">
+              <span class="active">sdb1</span>
+              <span class="active">sdc1</span>
+              <span class="backup">sdd1</span>
+            </div>
+          </div>
+
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#ff9800" d="M2,2V22H22V2H2M20,20H4V4H20V20M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
+              </svg>
+            </div>
+            <h3>md1 (RAID1)</h3>
+            <p class="raid-title">Swap раздел</p>
+            <p class="raid-size">4.6G</p>
+            <div class="raid-members">
+              <span class="active">sdb2</span>
+              <span class="active">sdc2</span>
+              <span class="backup">sdd2</span>
+            </div>
+          </div>
+
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#ff9800" d="M2,2V22H22V2H2M20,20H4V4H20V20M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
+              </svg>
+            </div>
+            <h3>md3 (RAID1)</h3>
+            <p class="raid-title">Загрузочный раздел (/boot)</p>
+            <p class="raid-size">953M</p>
+            <div class="raid-members">
+              <span class="active">sdb3</span>
+              <span class="active">sdc3</span>
+              <span class="backup">sdd3</span>
+            </div>
+          </div>
+
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#ff9800" d="M2,2V22H22V2H2M20,20H4V4H20V20M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
+              </svg>
+            </div>
+            <h3>md4 (RAID1)</h3>
+            <p class="raid-title">EFI раздел (/boot/efi)</p>
+            <p class="raid-size">953.9M</p>
+            <div class="raid-members">
+              <span class="active">sdb4</span>
+              <span class="active">sdc4</span>
+              <span class="backup">sdd4</span>
+            </div>
+            <p class="raid-note">RAID1 для /boot/efi создается после установки системы специальным скриптом</p>
+          </div>
+
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#ff9800" d="M2,2V22H22V2H2M20,20H4V4H20V20M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
+              </svg>
+            </div>
+            <h3>md2 (RAID1)</h3>
+            <p class="raid-title">Домашний раздел (/home)</p>
+            <p class="raid-size">142.4G</p>
+            <div class="raid-members">
+              <span class="active">sdb5</span>
+              <span class="active">sdc5</span>
+              <span class="backup">sdd5</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title">Аппаратный RAID массив</h3>
+        <div class="hardware-raid">
+          <div class="raid10-card">
+            <div class="raid10-header">
+              <svg viewBox="0 0 24 24" width="48" height="48">
+                <path fill="#673ab7" d="M4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.7C10,21.9 9.8,22 9.5,22H9A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2M12,14L16,10L12,6V9H8V11H12V14Z"/>
+              </svg>
+              <h3>RAID10 Storage (/store)</h3>
+            </div>
+            <div class="raid10-info">
+              <div class="controller">
+                <span class="label">Контроллер:</span>
+                <span class="value">LSI MegaRAID</span>
+              </div>
+              <div class="disks">
+                <div class="disk-row">
+                  <div class="disk-icon active" style="background-color: #e65100;"></div>
+                  <div class="disk-icon active" style="background-color: #e65100;"></div>
+                  <div class="disk-icon active" style="background-color: #e65100;"></div>
+                  <div class="disk-icon active" style="background-color: #e65100;"></div>
+                </div>
+                <span class="disk-info">4x HDD 1.8TB</span>
+              </div>
+            </div>
+            <div class="raid10-features">
+              <div class="feature">
+                <div class="feature-icon">
+                  <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="#4caf50" d="M13,2.05V2.05L13,4.05C17.39,4.59 20.5,8.58 19.96,12.97C19.5,16.61 16.64,19.5 13,19.93V21.93C18.5,21.38 22.5,16.5 21.95,11C21.5,6.25 17.73,2.5 13,2.05M11,2.06C9.05,2.25 7.19,3 5.67,4.26L7.1,5.74C8.22,4.84 9.57,4.26 11,4.06V2.06M4.26,5.67C3,7.19 2.25,9.04 2.05,11H4.05C4.24,9.58 4.8,8.23 5.69,7.1L4.26,5.67M2.06,13C2.26,14.96 3.03,16.81 4.27,18.33L5.69,16.9C4.81,15.77 4.24,14.42 4.06,13H2.06M7.1,18.37L5.67,19.74C7.18,21 9.04,21.79 11,22V20C9.58,19.82 8.23,19.25 7.1,18.37Z"/>
+                  </svg>
+                </div>
+                <h4>Производительность</h4>
+                <p>Параллельная запись на несколько дисков</p>
+              </div>
+              <div class="feature">
+                <div class="feature-icon">
+                  <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="#ff9800" d="M12,17C10.89,17 10,16.1 10,15C10,13.89 10.89,13 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M18,20H4V4H18V20M13,11H16L12,7L8,11H11V17H13V11Z"/>
+                  </svg>
+                </div>
+                <h4>Надежность</h4>
+                <p>Выдерживает отказ</p>
+              </div>
+            </div>
+            <div class="raid10-details">
+              <div class="detail">
+                <span class="detail-label">Файловая система:</span>
+                <span class="detail-value">Ext4</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Тип RAID:</span>
+                <span class="detail-value">RAID10 (RAID0+1)</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Общий объем:</span>
+                <span class="detail-value">3.6TB</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <h3 class="section-title">Детальная структура дисков</h3>
+        <div class="disk-structure">
+          <div class="disk-column">
+            <div class="disk-header">
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="#4caf50" d="M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M6,4V20H18V4H6Z"/>
+              </svg>
+              <h4>Диск sdc (Активный)</h4>
+            </div>
+            <div class="partition-list">
+              <div class="partition">
+                <span class="part-name">sdc1</span>
+                <span class="part-raid">md0 (корневой раздел /)</span>
+              </div>
+              <div class="partition">
+                <span class="part-name">sdc2</span>
+                <span class="part-raid">md1 (swap раздел)</span>
+              </div>
+              <div class="partition">
+                <span class="part-name">sdc3</span>
+                <span class="part-raid">md3 (загрузочный раздел /boot)</span>
+              </div>
+              <div class="partition">
+                <span class="part-name">sdc5</span>
+                <span class="part-raid">md2 (домашний раздел /home)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="disk-column">
+            <div class="disk-header">
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="#4caf50" d="M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M6,4V20H18V4H6Z"/>
+              </svg>
+              <h4>Диск sdd (Активный)</h4>
+            </div>
+            <div class="partition-list">
+              <div class="partition">
+                <span class="part-name">sdd1</span>
+                <span class="part-raid">md0 (корневой раздел /)</span>
+              </div>
+              <div class="partition">
+                <span class="part-name">sdd2</span>
+                <span class="part-raid">md1 (swap раздел)</span>
+              </div>
+              <div class="partition">
+                <span class="part-name">sdd3</span>
+                <span class="part-raid">md3 (загрузочный раздел /boot)</span>
+              </div>
+              <div class="partition">
+                <span class="part-name">sdd5</span>
+                <span class="part-raid">md2 (домашний раздел /home)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="disk-column">
+            <div class="disk-header">
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="#f06292" d="M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M6,4V20H18V4H6Z"/>
+              </svg>
+              <h4>Диск sdb (Запасной SSD 223.6G)</h4>
+            </div>
+            <div class="partition-list">
+              <div class="partition">
+                <span class="part-name">sdb1</span>
+                <span class="part-raid">md0 (корневой раздел /)</span>
+              </div>
+              <div class="partition">
+                <span class="part-name">sdb2</span>
+                <span class="part-raid">md1 (swap раздел)</span>
+              </div>
+              <div class="partition">
+                <span class="part-name">sdb3</span>
+                <span class="part-raid">md3 (загрузочный раздел /boot)</span>
+              </div>
+              <div class="partition">
+                <span class="part-name">sdb5</span>
+                <span class="part-raid">md2 (домашний раздел /home)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="encryption">
+      <h2>Шифрование LUKS</h2>
+      
+      <div class="section-container">
+        <div class="raid-grid">
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#673ab7" d="M12,17C10.89,17 10,16.1 10,15C10,13.89 10.89,13 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M18,20V10H6V20H18M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10C4,8.89 4.89,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"/>
+              </svg>
+            </div>
+            <h3>md0_crypt</h3>
+            <p class="raid-title">Корневой раздел (/)</p>
+            <div class="raid-details-grid">
+              <div class="detail">
+                <span class="detail-label">Тип:</span>
+                <span class="detail-value">LUKS2</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Шифр:</span>
+                <span class="detail-value">aes-xts-plain64</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Размер ключа:</span>
+                <span class="detail-value">512 bits</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Размер сектора:</span>
+                <span class="detail-value">512</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Режим:</span>
+                <span class="detail-value">read/write</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#673ab7" d="M12,17C10.89,17 10,16.1 10,15C10,13.89 10.89,13 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M18,20V10H6V20H18M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10C4,8.89 4.89,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"/>
+              </svg>
+            </div>
+            <h3>md1_crypt</h3>
+            <p class="raid-title">Swap раздел</p>
+            <div class="raid-details-grid">
+              <div class="detail">
+                <span class="detail-label">Тип:</span>
+                <span class="detail-value">LUKS2</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Шифр:</span>
+                <span class="detail-value">aes-xts-plain64</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Размер ключа:</span>
+                <span class="detail-value">512 bits</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Размер сектора:</span>
+                <span class="detail-value">512</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Режим:</span>
+                <span class="detail-value">read/write</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#673ab7" d="M12,17C10.89,17 10,16.1 10,15C10,13.89 10.89,13 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M18,20V10H6V20H18M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10C4,8.89 4.89,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"/>
+              </svg>
+            </div>
+            <h3>md2_crypt</h3>
+            <p class="raid-title">Домашний раздел (/home)</p>
+            <div class="raid-details-grid">
+              <div class="detail">
+                <span class="detail-label">Тип:</span>
+                <span class="detail-value">LUKS2</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Шифр:</span>
+                <span class="detail-value">aes-xts-plain64</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Размер ключа:</span>
+                <span class="detail-value">512 bits</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Размер сектора:</span>
+                <span class="detail-value">512</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Режим:</span>
+                <span class="detail-value">read/write</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="installation">
+      <h2>Процесс установки</h2>
+      <div class="section-container">
+        <div class="raid-grid">
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#4CAF50" d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.1 14.8,9.5V11C15.4,11 16,11.6 16,12.3V15.8C16,16.4 15.4,17 14.7,17H9.2C8.6,17 8,16.4 8,15.7V12.2C8,11.6 8.6,11 9.2,11V9.5C9.2,8.1 10.6,7 12,7Z"/>
+              </svg>
+            </div>
+            <h3>Шаг 1: Настройка BIOS</h3>
+            <div class="installation-steps">
+              <p class="step">Отключение CSM (Compatibility Support Module)</p>
+              <p class="step">Включение UEFI режима</p>
+              <p class="step">Настройка TPM</p>
+              <p class="step">Отключение VT-d для избежания конфликтов</p>
+            </div>
+          </div>
+          
+           <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">  
+                <path fill="#F44336" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+              </svg>
+            </div>
+            <h3>Шаг 2: Разметка диска и шифрование</h3>
+            <div class="installation-steps">
+              <p class="step">Создание разделов GPT на всех дисках</p>
+              <p class="step">Настройка LUKS шифрования для root и home разделов</p>
+              <p class="step">Создание файловых систем ext4</p>
+            </div>
+          </div>
+           <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#2196F3" d="M13,2.05V2.05L13,4.05C17.39,4.59 20.5,8.58 19.96,12.97C19.5,16.61 16.64,19.5 13,19.93V21.93C18.5,21.38 22.5,16.5 21.95,11C21.5,6.25 17.73,2.5 13,2.05M11,2.06C9.05,2.25 7.19,3 5.67,4.26L7.1,5.74C8.22,4.84 9.57,4.26 11,4.06V2.06M4.26,5.67C3,7.19 2.25,9.04 2.05,11H4.05C4.24,9.58 4.8,8.23 5.69,7.1L4.26,5.67M2.06,13C2.26,14.96 3.03,16.81 4.27,18.33L5.69,16.9C4.81,15.77 4.24,14.42 4.06,13H2.06M7.1,18.37L5.67,19.74C7.18,21 9.04,21.79 11,22V20C9.58,19.82 8.23,19.25 7.1,18.37Z"/>
+              </svg>
+            </div>
+            <h3>Шаг 3: Базовая настройка системы</h3>
+            <div class="installation-steps">
+              <p class="step">Настройка root доступа</p>
+              <p class="step">Установка и настройка Timeshift</p>
+              <p class="step">Создание первоначального снапшота системы</p>
+            </div>
+          </div>
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#9C27B0" d="M12,17C10.89,17 10,16.1 10,15C10,13.89 10.89,13 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M18,20H4V4H18V20M13,11H16L12,7L8,11H11V17H13V11Z"/>
+              </svg>
+            </div>
+            <h3>Шаг 4: Настройка RAID</h3>
+            <div class="installation-steps">
+              <p class="step">Установка mdadm и efibootmgr</p>
+              <p class="step">Создание RAID1 массива для /boot/efi</p>
+              <p class="step">Форматирование и монтирование RAID</p>
+              <p class="step">Настройка GRUB для работы с RAID</p>
+            </div>
+          </div>
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#FF9800" d="M3,3H21V5H3V3M3,7H21V9H3V7M3,11H21V13H3V11M3,15H21V17H3V15M3,19H21V21H3V19Z"/>
+              </svg>
+            </div>
+            <h3>Шаг 5: Настройка окружения</h3>
+            <div class="installation-steps">
+              <p class="step">Обновление списка пакетов (apt update)</p>
+              <p class="step">Установка базовых пакетов</p>
+              <p class="step">Установка и настройка Nginx</p>
+              <p class="step">Установка PHP 8.2 с поддержкой PostgreSQL</p>
+              <p class="step">Установка и настройка PostgreSQL</p>
+            </div>
+          </div>
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#00BCD4" d="M12,3C7.58,3 4,4.79 4,7C4,9.21 7.58,11 12,11C16.42,11 20,9.21 20,7C20,4.79 16.42,3 12,3M4,9V12C4,14.21 7.58,16 12,16C17.16,16 20,14.21 20,12V9C20,11.21 16.42,13 12,13C7.58,13 4,11.21 4,9M4,14V17C4,19.21 7.58,21 12,21C17.16,21 20,19.21 20,17V14C20,16.21 16.42,18 12,18C7.58,18 4,16.21 4,14Z"/>  
+              </svg>
+            </div>
+            <h3>Шаг 6: Установка MySQL и Boosty</h3>
+            <div class="installation-steps">
+              <p class="step">Установка и настройка MySQL сервера</p>
+              <p class="step">Настройка безопасности MySQL</p>
+              <p class="step">Установка PHP модулей для MySQL</p>
+              <p class="step">Настройка интеграции с Boosty</p>
+            </div>
+          </div>
+          <div class="raid-card">
+            <div class="raid-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#FF5722" d="M13,2.05V2.05L13,4.05C17.39,4.59 20.5,8.58 19.96,12.97C19.5,16.61 16.64,19.5 13,19.93V21.93C18.5,21.38 22.5,16.5 21.95,11C21.5,6.25 17.73,2.5 13,2.05M11,2.06C9.05,2.25 7.19,3 5.67,4.26L7.1,5.74C8.22,4.84 9.57,4.26 11,4.06V2.06M4.26,5.67C3,7.19 2.25,9.04 2.05,11H4.05C4.24,9.58 4.8,8.23 5.69,7.1L4.26,5.67M2.06,13C2.26,14.96 3.03,16.81 4.27,18.33L5.69,16.9C4.81,15.77 4.24,14.42 4.06,13H2.06M7.1,18.37L5.67,19.74C7.18,21 9.04,21.79 11,22V20C9.58,19.82 8.23,19.25 7.1,18.37Z"/>
+              </svg>
+            </div>
+            <h3>Шаг 7: Установка PHP 7.4 из исходников</h3>
+            <div class="installation-steps">
+              <p class="step">Компиляция и установка PHP 7.4 в /usr/local/php7.4</p>
+              <p class="step">Настройка PHP-FPM</p>
+              <p class="step">Конфигурация альтернативных версий через update-alternatives</p>
+              <p class="step">Создание и настройка systemd службы php7.4-fpm</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="system">
+      <h2>Информация о системе</h2>
+      <div class="section-container">
+        <div class="system-grid">
+          <!-- OS Info -->
+          <div class="system-card">
+            <div class="system-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#ff4081" d="M21,12A9,9 0 0,1 12,21A9,9 0 0,1 3,12A9,9 0 0,1 12,3A9,9 0 0,1 21,12M12,19C15.86,19 19,15.86 19,12C19,8.14 15.86,5 12,5C8.14,5 5,8.14 5,12C5,15.86 8.14,19 12,19"/>
+              </svg>
+            </div>
+            <h3>Операционная система</h3>
+            <div class="system-details">
+              <div class="detail-item">
+                <span class="detail-label">Description:</span>
+                <span class="detail-value">Debian GNU/Linux 12 (bookworm)</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Release:</span>
+                <span class="detail-value">12</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Codename:</span>
+                <span class="detail-value">bookworm</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Web Server Info -->
+          <div class="system-card">
+            <div class="system-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#2196f3" d="M20,4H4C2.89,4 2,4.89 2,6V18C2,19.11 2.89,20 4,20H20C21.11,20 22,19.11 22,18V6C22,4.89 21.11,4 20,4M20,18H4V8H20V18Z"/>
+              </svg>
+            </div>
+            <h3>Веб-сервер</h3>
+            <div class="system-details">
+              <div class="detail-item">
+                <span class="detail-label">NGINX версия:</span>
+                <span class="detail-value">1.22.1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PHP Info -->
+          <div class="system-card">
+            <div class="system-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#673ab7" d="M12,6.5C8.96,6.5 6.5,8.96 6.5,12C6.5,15.04 8.96,17.5 12,17.5C15.04,17.5 17.5,15.04 17.5,12C17.5,8.96 15.04,6.5 12,6.5M12,8.2C11.2,8.2 10.5,8.7 10.5,9.5V11H13.5V9.5C13.5,8.7 12.8,8.2 12,8.2Z"/>
+              </svg>
+            </div>
+            <h3>PHP</h3>
+            <div class="system-details">
+              <div class="detail-item">
+                <span class="detail-label">PHP 8.2:</span>
+                <span class="detail-value">8.2.26 (для Zabbix)</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">PHP 7.4:</span>
+                <span class="detail-value">7.4 (для Asterisk)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Databases Info -->
+          <div class="system-card">
+            <div class="system-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#4caf50" d="M3,3H21V5H3V3M3,7H21V9H3V7M3,11H21V13H3V11M3,15H21V17H3V15M3,19H21V21H3V19Z"/>
+              </svg>
+            </div>
+            <h3>Базы данных</h3>
+            <div class="system-details">
+              <div class="detail-item">
+                <span class="detail-label">PostgreSQL:</span>
+                <span class="detail-value">17.3 (Debian 17.3-1.pgdg120+1)</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">TimescaleDB:</span>
+                <span class="detail-value">2.18.1</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">MySQL:</span>
+                <span class="detail-value">8.4.4</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Boost:</span>
+                <span class="detail-value">1.74.0.3</span>
+              </div>
+              
+              <!-- PostgreSQL Details -->
+              <div class="detail-item postgresql-details" style="margin-top: 1rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 1rem;">
+                <span class="detail-label">Базы данных PostgreSQL:</span>
+                <div class="pg-database" style="margin: 0.5rem 0; padding: 0.5rem; background: rgba(0,0,0,0.02); border-radius: 4px;">
+                  <span style="font-family: monospace; color: var(--primary);">zabbix</span>
+                  <span style="color: #666; margin-left: 0.5rem;">| Владелец: zabbix | Кодировка: UTF8</span>
+                </div>
+                
+                <span class="detail-label" style="margin-top: 1rem;">Роли PostgreSQL:</span>
+                <div class="pg-roles" style="margin-top: 0.5rem;">
+                  <div class="role-item" style="padding: 0.4rem; background: rgba(0,0,0,0.02); margin-bottom: 0.3rem; border-radius: 4px;">
+                    <span style="font-family: monospace; color: var(--primary);">postgres</span>
+                    <span style="color: #666; font-size: 0.9rem; display: block;">Суперпользователь, Создаёт роли, Создаёт БД, Репликация, Пропускать RLS</span>
+                  </div>
+                  <div class="role-item" style="padding: 0.4rem; background: rgba(0,0,0,0.02); margin-bottom: 0.3rem; border-radius: 4px;">
+                    <span style="font-family: monospace; color: var(--primary);">zabbix</span>
+                  </div>
+                  <div class="role-item" style="padding: 0.4rem; background: rgba(0,0,0,0.02); border-radius: 4px;">
+                    <span style="font-family: monospace; color: var(--primary);">zadmin</span>
+                    <span style="color: #666; font-size: 0.9rem; display: block;">Суперпользователь</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monitoring Systems -->
+          <div class="system-card">
+            <div class="system-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#ff9800" d="M13,2.05V2.05L13,4.05C17.39,4.59 20.5,8.58 19.96,12.97C19.5,16.61 16.64,19.5 13,19.93V21.93C18.5,21.38 22.5,16.5 21.95,11C21.5,6.25 17.73,2.5 13,2.05M11,2.06C9.05,2.25 7.19,3 5.67,4.26L7.1,5.74C8.22,4.84 9.57,4.26 11,4.06V2.06M4.26,5.67C3,7.19 2.25,9.04 2.05,11H4.05C4.24,9.58 4.8,8.23 5.69,7.1L4.26,5.67M2.06,13C2.26,14.96 3.03,16.81 4.27,18.33L5.69,16.9C4.81,15.77 4.24,14.42 4.06,13H2.06M7.1,18.37L5.67,19.74C7.18,21 9.04,21.79 11,22V20C9.58,19.82 8.23,19.25 7.1,18.37Z"/>
+              </svg>
+            </div>
+            <h3>Системы мониторинга и связи</h3>
+            <div class="system-details">
+              <div class="detail-item">
+                <span class="detail-label">Zabbix Server:</span>
+                <span class="detail-value">7.2.3</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Asterisk:</span>
+                <span class="detail-value">18.26.1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Components -->
+          <div class="system-card">
+            <div class="system-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path fill="#9c27b0" d="M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10C4,8.89 4.89,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,17A2,2 0 0,0 14,15A2,2 0 0,0 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9"/>
+              </svg>
+            </div>
+
+            <h3>Состояние служб и порты</h3>
+            <div class="system-details services-grid">
+              <div class="service-item">
+                <h4>NGINX</h4>
+                <div class="service-status">
+                  <span class="status-badge active">Запущена</span>
+                  <span class="port-badge">Порт: 80</span>
+                </div>
+              </div>
+              <div class="service-item">
+                <h4>PostgreSQL</h4>
+                <div class="service-status">
+                  <span class="status-badge active">Запущена</span>
+                  <span class="port-badge">Порт: 5432</span>
+                </div>
+              </div>
+              <div class="service-item">
+                <h4>Zabbix Server</h4>
+                <div class="service-status">
+                  <span class="status-badge active">Запущена</span>
+                  <span class="port-badge">Порты: 10050, 10051</span>
+                </div>
+              </div>
+              <div class="service-item">
+                <h4>MySQL</h4>
+                <div class="service-status">
+                  <span class="status-badge active">Запущена</span>
+                  <span class="port-badge">Порты: 3306, 33060</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="check">
+      <h2>Проверка настроек</h2>
+      <div class="section-container">
+        <h3 class="check-section-title">Выберите категорию проверок</h3>
+        
+        <div class="checks-tabs">
+          <div class="check-tab active" data-check-tab="system">Системные настройки</div>
+          <div class="check-tab" data-check-tab="raid">RAID и диски</div>
+          <div class="check-tab" data-check-tab="security">Безопасность</div>
+          <div class="check-tab" data-check-tab="services">Сервисы</div>
+        </div>
+
+        <!-- System Checks -->
+        <div class="check-content-container active" data-check-content="system">
+          <div class="check-accordion">
+            <div class="check-accordion-header">
+              <svg class="check-accordion-icon" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+              </svg>
+              <span>Проверка отключения CSM</span>
+            </div>
+            <div class="check-accordion-content">
+              <div class="check-description">
+                <p>CSM (Compatibility Support Module) — это режим совместимости, который позволяет использовать старый BIOS-режим загрузки вместе с UEFI.</p>
+              </div>
+
+              <div class="check-steps">
+                <h4>Проверка в BIOS/UEFI:</h4>
+                <ul>
+                  <li>
+                    <span class="step-number">1</span>
+                    <span class="step-text">Найдите параметр CSM/Legacy Mode/Compatibility Support Module</span>
+                  </li>
+                  <li>
+                    <span class="step-number">2</span>
+                    <span class="step-text">Убедитесь, что он отключен (Disabled)</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="check-warnings">
+                <h4>Возможные проблемы при включенном CSM:</h4>
+                <ul>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Некорректная установка операционной системы</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Проблемы с созданием EFI раздела</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Возможны сбои в работе загрузчика</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="check-accordion">
+            <div class="check-accordion-header">
+              <svg class="check-accordion-icon" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+              </svg>
+              <span>Проверка включения UEFI режима</span>
+            </div>
+            <div class="check-accordion-content">
+              <div class="check-description">
+                <p>UEFI — это современный стандарт загрузки, который заменяет старый BIOS. Для работы с UEFI-загрузчиками (например, GRUB) этот режим должен быть включен.</p>
+              </div>
+
+              <div class="check-steps">
+                <h4>Проверка режима загрузки:</h4>
+                <div style="background: #1e1e1e; color: #fff; padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                  <p style="margin: 0;">$ [ -d /sys/firmware/efi ] && echo "UEFI" || echo "BIOS"</p>
+                  <p style="color: #4caf50; margin: 0.5rem 0 0 0;">UEFI</p>
+                </div>
+                <div style="background: #f5f5f5; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
+                  <span style="color: #666;">Ожидаемый результат: </span>
+                  <span style="color: #4caf50; font-weight: bold;">UEFI</span>
+                </div>
+              </div>
+
+              <div class="check-warnings">
+                <h4>Последствия неправильной настройки UEFI:</h4>
+                <ul>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Возможны ошибки загрузки операционной системы</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Не будет работать безопасная загрузка (Secure Boot)</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Система может загружаться в Legacy режиме вместо UEFI</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="check-accordion">
+            <div class="check-accordion-header">
+              <svg class="check-accordion-icon" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+              </svg>
+              <span>Проверка настройки TPM</span>
+            </div>
+            <div class="check-accordion-content">
+              <div class="check-description">
+                <p>TPM (Trusted Platform Module) — это криптопроцессор, который обеспечивает дополнительный уровень безопасности системы.</p>
+              </div>
+
+              <div class="check-steps">
+                <h4>Проверка загрузки модуля TPM:</h4>
+                <div style="background: #1e1e1e; color: #fff; padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                  <p style="margin: 0;">$ lsmod | grep tpm</p>
+                  <pre style="color: #4caf50">tpm_tis                 16384  0
+tpm                    49152  1 tpm_tis
+tpm_tis_core          32768  1 tpm_tis</pre>
+                </div>
+              </div>
+
+              <div class="check-warnings">
+                <h4>Возможные проблемы при отсутствии TPM:</h4>
+                <ul>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Невозможность использования полного шифрования диска</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Снижение общего уровня безопасности системы</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="check-accordion">
+            <div class="check-accordion-header">
+              <svg class="check-accordion-icon" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+              </svg>
+              <span>Проверка отключения VT-d</span>
+            </div>
+            <div class="check-accordion-content">
+              <div class="check-description">
+                <p>VT-d (Virtualization Technology for Directed I/O) — это технология виртуализации прямого ввода-вывода. Иногда она может вызывать конфликты с определенным программным обеспечением или драйверами.</p>
+              </div>
+
+              <div class="check-steps">
+                <h4>Проверка в BIOS/UEFI:</h4>
+                <ul>
+                  <li>
+                    <span class="step-number">1</span>
+                    <span class="step-text">В настройках BIOS найдите раздел Advanced или CPU Configuration</span>
+                  </li>
+                  <li>
+                    <span class="step-number">2</span>
+                    <span class="step-text">Найдите параметр Intel VT-d или AMD IOMMU</span>
+                  </li>
+                  <li>
+                    <span class="step-number">3</span>
+                    <span class="step-text">Убедитесь, что он отключен (Disabled)</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="check-warnings">
+                <h4>Важность отключения VT-d:</h4>
+                <ul>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Помогает избежать конфликтов с драйверами ядра Linux</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Улучшает стабильность работы RAID массивов</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Предотвращает проблемы с шифрованием</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RAID Checks -->
+        <div class="check-content-container" data-check-content="raid">
+          <div class="check-accordion">
+            <div class="check-accordion-header">
+              <svg class="check-accordion-icon" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+              </svg>
+              <span>Проверка разделов и точек монтирования</span>
+            </div>
+            <div class="check-accordion-content">
+              <div class="check-description">
+                <p>Правильная структура разделов и корректные точки монтирования критически важны для работы системы.</p>
+              </div>
+
+              <div class="check-steps">
+                <h4>Проверка структуры разделов:</h4>
+                <div style="background: #1e1e1e; color: #fff; padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                  <p style="margin: 0;">$ lsblk</p>
+                  <pre style="color: #4caf50">NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda           8:0    0   100G  0 disk 
+├─sda1        8:1    0     1G  0 part /boot
+├─sda2        8:2    0    50G  0 part /
+├─sda3        8:3    0    20G  0 part [SWAP]
+└─sda4        8:4    0    29G  0 part /home
+sdb           8:16   0   200G  0 disk 
+└─sdb1        8:17   0   200G  0 part /store</pre>
+                </div>
+
+                <h4>Проверка точек монтирования:</h4>
+                <div style="background: #1e1e1e; color: #fff; padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                  <p style="margin: 0;">$ df -hT</p>
+                  <pre style="color: #4caf50; overflow-x: auto;">Filesystem     Type      Size  Used Avail Use% Mounted on
+udev           devtmpfs   10M     0   10M   0% /dev
+sda2           ext4       50G   10G   38G  21% /
+sda4           ext4       29G   5G    23G  18% /home
+sdb1           ext4      200G   50G  150G  25% /store</pre>
+                </div>
+              </div>
+
+              <div class="check-warnings">
+                <h4>На что обратить внимание:</h4>
+                <ul>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Все разделы должны быть правильно смонтированы</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Файловые системы должны соответствовать ожидаемым типам</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Проверьте наличие достаточного свободного места</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="check-accordion">
+            <div class="check-accordion-header">
+              <svg class="check-accordion-icon" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+              </svg>
+              <span>Проверка RAID1 массива для /boot/efi</span>
+            </div>
+            <div class="check-accordion-content">
+              <div class="check-description">
+                <p>RAID1 для /boot/efi обеспечивает отказоустойчивость загрузочного раздела системы.</p>
+              </div>
+
+              <div class="check-steps">
+                <h4>Проверка состояния RAID массивов:</h4>
+                <div class="terminal-output">
+                  <p>$ cat /proc/mdstat</p>
+                  <pre>Personalities : [raid1]
+md4 : active raid1 sdb4[0] sdc4[1]
+      975360 blocks super 1.2 [2/2] [UU]</pre>
+                </div>
+
+                <h4>Проверка файловой системы:</h4>
+                <div class="terminal-output">
+                  <p>$ lsblk -f</p>
+                  <pre>NAME    FSTYPE   LABEL UUID
+md4     vfat           UUID-HERE    /boot/efi</pre>
+                </div>
+
+                <h4>Проверка монтирования:</h4>
+                <div class="terminal-output">
+                  <p>$ mount | grep efi</p>
+                  <pre>/dev/md4 on /boot/efi type vfat (rw,relatime)</pre>
+                </div>
+              </div>
+
+              <div class="check-warnings">
+                <h4>На что обратить внимание:</h4>
+                <ul>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Статус [UU] означает, что оба диска в массиве активны</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Файловая система должна быть vfat для совместимости с UEFI</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Checks -->
+        <div class="check-content-container" data-check-content="security">
+          <div class="check-accordion">
+            <div class="check-accordion-header">
+              <svg class="check-accordion-icon" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+              </svg>
+              <span>Проверка LUKS шифрования</span>
+            </div>
+            <div class="check-accordion-content">
+              <div class="check-description">
+                <p>LUKS (Linux Unified Key Setup) обеспечивает шифрование разделов. Важно убедиться, что все разделы правильно зашифрованы и функционируют.</p>
+              </div>
+
+              <div class="check-steps">
+                <h4>Проверка статуса шифрования:</h4>
+                <div style="background: #1e1e1e; color: #fff; padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                  <p style="margin: 0;">$ sudo cryptsetup status sda2_crypt</p>
+                  <pre style="color: #4caf50">/dev/mapper/sda2_crypt is active and is in use.
+  type:    LUKS1
+  cipher:  aes-xts-plain64
+  keysize: 512 bits
+  device:  /dev/sda2</pre>
+                </div>
+
+                <h4>Проверка всех шифрованных устройств:</h4>
+                <div style="background: #1e1e1e; color: #fff; padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                  <p style="margin: 0;">$ sudo dmsetup ls --tree</p>
+                  <pre style="color: #4caf50">sda2_crypt (253:0)
+├─vg-root (253:1)
+│ └─-
+└─vg-swap_1 (253:2)
+  └─-
+sda4_crypt (253:3)
+└─home (253:4)
+  └─-</pre>
+                </div>
+              </div>
+
+              <div class="check-warnings">
+                <h4>Важные моменты проверки:</h4>
+                <ul>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Все критичные разделы должны быть зашифрованы</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Проверьте правильность типа шифрования и размера ключа</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Убедитесь, что все устройства активны и используются</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Services Checks -->
+        <div class="check-content-container" data-check-content="services">
+          <div class="check-accordion">
+            <div class="check-accordion-header">
+              <svg class="check-accordion-icon" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+              </svg>
+              <span>Проверка PostgreSQL 17 и TimescaleDB</span>
+            </div>
+            <div class="check-accordion-content">
+              <div class="check-description">
+                <p>PostgreSQL 17 с расширением TimescaleDB используется для хранения данных Zabbix. Важно убедиться в корректности установки и настройки.</p>
+              </div>
+
+              <div class="check-steps">
+                <h4>Проверка версии PostgreSQL:</h4>
+                <div class="terminal-output">
+                  <p>$ psql --version</p>
+                  <pre style="color: #4caf50">psql (PostgreSQL) 17.3</pre>
+                </div>
+
+                <h4>Проверка статуса службы:</h4>
+                <div class="terminal-output">
+                  <p>$ systemctl status postgresql</p>
+                  <pre style="color: #4caf50">● postgresql.service - PostgreSQL RDBMS
+   Active: active (running)</pre>
+                </div>
+
+                <h4>Проверка подключения:</h4>
+                <div class="terminal-output">
+                  <p>$ sudo -u postgres psql</p>
+                  <pre style="color: #4caf50">psql (17.3)
+Type "help" for help.
+
+postgres=#</pre>
+                </div>
+
+                <h4>Проверка TimescaleDB:</h4>
+                <div class="terminal-output">
+                  <p>$ sudo -u postgres psql -d zabbix -c "SELECT extname, extversion FROM pg_extension WHERE extname = 'timescaledb';"</p>
+                  <pre style="color: #4caf50">  extname   | extversion
+-----------+------------
+timescaledb | 2.18.1</pre>
+                </div>
+
+                <h4>Проверка гипертаблиц Zabbix:</h4>
+                <div class="terminal-output">
+                  <p>$ sudo -u postgres psql -d zabbix -c "SELECT * FROM timescaledb_information.hypertables;"</p>
+                  <pre style="color: #4caf50">[Вывод списка гипертаблиц Zabbix]</pre>
+                </div>
+
+                <h4>Проверка базы данных Zabbix:</h4>
+                <div class="terminal-output">
+                  <p>$ psql -U zabbix -d zabbix -c "\l+"</p>
+                  <pre style="color: #4caf50">  Name   | Owner  | Encoding |   Size    | Description 
+--------+--------+----------+-----------+-------------
+ zabbix | zabbix | UTF8     | 123.4 MB  | Zabbix database</pre>
+                </div>
+              </div>
+
+              <div class="check-warnings">
+                <h4>Важные моменты проверки:</h4>
+                <ul>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Все необходимые расширения должны быть установлены</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>TimescaleDB должен быть корректно интегрирован</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>База данных должна иметь правильные права доступа</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Версия PostgreSQL должна соответствовать 17.x</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="check-accordion">
+            <div class="check-accordion-header">
+              <svg class="check-accordion-icon" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+              </svg>
+              <span>Проверка Zabbix Server</span>
+            </div>
+            <div class="check-accordion-content">
+              <div class="check-description">
+                <p>Zabbix Server - основной компонент системы мониторинга. Важно убедиться в корректности его настройки и работы.</p>
+              </div>
+
+              <div class="check-steps">
+                <h4>Проверка конфигурации Zabbix Server:</h4>
+                <div class="terminal-output">
+                  <p>$ cat /etc/zabbix/zabbix_server.conf</p>
+                  <pre style="color: #4caf50">DBHost=localhost
+DBName=zabbix
+DBUser=zabbix
+DBPassword=<hidden></pre>
+                </div>
+
+                <h4>Проверка логов:</h4>
+                <div class="terminal-output">
+                  <p>$ tail -f /var/log/zabbix/zabbix_server.log</p>
+                  <pre style="color: #4caf50">[Вывод логов сервера Zabbix]</pre>
+                </div>
+
+                <h4>Проверка статуса служб:</h4>
+                <div class="terminal-output">
+                  <p>$ systemctl list-units --type=service | grep zabbix</p>
+                  <pre style="color: #4caf50">zabbix-server.service    loaded active running   Zabbix Server
+zabbix-agent.service     loaded active running   Zabbix Agent</pre>
+                </div>
+
+                <h4>Проверка веб-интерфейса:</h4>
+                <div style="background: rgba(0,0,0,0.02); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                  <ol style="list-style-type: decimal; padding-left: 1.5rem;">
+                    <li>Откройте браузер и перейдите по адресу: http://ваш-сервер/zabbix</li>
+                    <li>Должна отобразиться страница входа Zabbix</li>
+                    <li style="margin-top: 0.5rem;">
+                      Проверьте вход с учетными данными по умолчанию:
+                      <div style="background: rgba(0,0,0,0.05); padding: 0.5rem; border-radius: 4px; margin-top: 0.3rem;">
+                        <div>Логин: <code>Admin</code></div>
+                        <div>Пароль: <code>zabbix</code></div>
+                      </div>
+                    </li>
+                  </ol>
+                </div>
+              </div>
+
+              <div class="check-warnings">
+                <h4>Важные моменты проверки:</h4>
+                <ul>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Все службы Zabbix должны быть активны и запущены</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>В логах не должно быть ошибок</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Веб-интерфейс должен быть доступен</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>После первого входа смените пароль администратора</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="check-accordion">
+            <div class="check-accordion-header">
+              <svg class="check-accordion-icon" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+              </svg>
+              <span>Проверка установки PHP 7.4</span>
+            </div>
+            <div class="check-accordion-content">
+              <div class="check-description">
+                <p>PHP 7.4 установлен из исходников в /usr/local/php7.4 для обеспечения поддержки специфических приложений.</p>
+              </div>
+
+              <div class="check-steps">
+                <h4>Проверка версии PHP 7.4:</h4>
+                <div class="terminal-output">
+                  <p>$ /usr/local/php7.4/bin/php -v</p>
+                  <pre style="color: #4caf50">PHP 7.4.33 (cli)
+Zend Engine v3.4.0</pre>
+                </div>
+
+                <h4>Проверка статуса PHP-FPM:</h4>
+                <div class="terminal-output">
+                  <p>$ systemctl status php7.4-fpm</p>
+                  <pre style="color: #4caf50">● php7.4-fpm.service - The PHP 7.4 FastCGI Process Manager
+   Active: active (running)</pre>
+                </div>
+
+                <h4>Проверка альтернативной версии PHP:</h4>
+                <div class="terminal-output">
+                  <p>$ sudo update-alternatives --config php</p>
+                  <pre style="color: #4caf50">
+# Удалите или измените, если найдете:
+php_admin_value[post_max_size] = ...
+php_admin_value[upload_max_filesize] = ...
+php_admin_value[max_execution_time] = ...
+php_admin_value[max_input_time] = ...</pre>
+                </div>
+
+                <h4>Проверка через веб-интерфейс:</h4>
+                <div style="background: rgba(0,0,0,0.02); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                  <ol style="list-style-type: decimal; padding-left: 1.5rem;">
+                    <li>Создайте временный файл info.php:
+                      <div class="terminal-output" style="margin: 0.5rem 0">
+                        <p>$ echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php</p>
+                      </div>
+                    </li>
+                    <li>Откройте в браузере: http://ваш-сервер/info.php</li>
+                    <li>После проверки удалите файл:
+                      <div class="terminal-output" style="margin: 0.5rem 0">
+                        <p>$ sudo rm /var/www/html/info.php</p>
+                      </div>
+                    </li>
+                  </ol>
+                </div>
+
+                <h4>Настройка Bash Prompt:</h4>
+                <div class="terminal-output">
+                  <p>$ simple  # Простой PS1</p>
+                  <p>$ fancy   # Расширенный PS1</p>
+                </div>
+              </div>
+
+              <div class="check-warnings">
+                <h4>Важные моменты проверки:</h4>
+                <ul>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Убедитесь, что все необходимые модули PHP установлены</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>После смены версии PHP перезапустите веб-сервер</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>Проверьте работу всех PHP-приложений после смены версии</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#ff5722" d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                    </svg>
+                    <span>PHP-FPM должен быть активен и работать</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="instructions">
+      <h2>Инструкции по настройке</h2>
+      <div class="section-container">
+        <div class="instruction-tabs">
+          <button class="instruction-tab active" data-tab="mounting">Монтирование разделов</button>
+          <button class="instruction-tab" data-tab="raid">RAID1 для EFI</button>
+          <button class="instruction-tab" data-tab="psql">Перенос PostgreSQL</button>
+          <button class="instruction-tab" data-tab="php">Настройка PHP-FPM</button>
+          <button class="instruction-tab" data-tab="mysql">MySQL Plugin</button>
+          <button class="instruction-tab" data-tab="shell">Оболочка Sphera</button>
+          <button class="instruction-tab" data-tab="sql">Импорт SQL</button>
+          <button class="instruction-tab" data-tab="kms">Intel KMS</button>
+          <button class="instruction-tab" data-tab="symlink">Изменение символической ссылки</button>
+        </div>
+
+
+<div class="instruction-tab-panel" data-panel="symlink">
+  <div class="instruction-header">
+    <div class="instruction-icon">
+      <svg viewBox="0 0 24 24" width="40" height="40">
+        <path fill="#FF9800" d="M10,17L5,12L6.41,10.58L10,14.17L17.59,6.58L19,8M3,4V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V4C21,2.9 20.1,2 19,2H5C3.9,2 3,2.9 3,4Z"/>
+      </svg>
+    </div>
+    <h3>Изменение символической ссылки в Linux</h3>
+  </div>
+  <div class="instruction-content">
+    <div class="instruction-goal">
+      <h4>Цель</h4>
+      <p>Изменить существующую символьную ссылку /usr/local/httpd/htdocs для указания на директорию /usr/share/aster вместо текущей /usr/share/nginx/html/htdocs</p>
+    </div>
+    <div class="instruction-requirements">
+      <h4>Требования</h4>
+      <ul>
+        <li>Доступ root или права sudo</li>
+        <li>Существующая символьная ссылка /usr/local/httpd/htdocs</li>
+        <li>Наличие директории /usr/share/aster</li>
+      </ul>
+    </div>
+    <div class="instruction-steps">
+      <h4>Шаг 1: Проверка существования целевой директории</h4>
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+        </div>
+        <div class="terminal-output">
+          <div class="command">ls -ld /usr/share/aster</div>
+          <div class="response">drwxr-xr-x 2 root root 4096 Oct 10 12:34 /usr/share/aster</div>
+        </div>
+      </div>
+      <h4>Шаг 2: Изменение символической ссылки</h4>
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+        </div>
+        <div class="terminal-output">
+          <div class="command">sudo ln -snf /usr/share/aster /usr/local/httpd/htdocs</div>
+        </div>
+      </div>
+      <h4>Шаг 3: Проверка параметров команды</h4>
+      <p>
+        <strong>-s</strong>: Создать символическую ссылку<br>
+        <strong>-n</strong>: Не следовать существующей ссылке при её удалении<br>
+        <strong>-f</strong>: Принудительно удалить уже существующую ссылку
+      </p>
+      <h4>Шаг 4: Проверка результата</h4>
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+        </div>
+        <div class="terminal-output">
+          <div class="command">ls -l /usr/local/httpd/htdocs</div>
+          <div class="response">lrwxrwxrwx 1 root root 16 Oct 10 12:35 /usr/local/httpd/htdocs -> /usr/share/aster</div>
+        </div>
+      </div>
+    </div>
+    <div class="instruction-special-cases">
+      <h4>Особые случаи</h4>
+      <h5>Если директория /usr/share/aster отсутствует</h5>
+      <p>Перед созданием ссылки убедитесь, что целевая директория существует. Если нет, создайте её с помощью команды:</p>
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+        </div>
+        <div class="terminal-output">
+          <div class="command">sudo mkdir -p /usr/share/aster</div>
+        </div>
+      </div>
+    </div>
+    <div class="instruction-notes">
+      <h4>Важные замечания</h4>
+      <ul>
+        <li>Убедитесь, что у вас есть необходимые права доступа для изменения ссылки</li>
+        <li>При использовании параметра -f будьте внимательны, так как это приведёт к безвозвратному удалению существующей ссылки</li>
+        <li>После изменения ссылки проверьте работоспособность вашего сервера</li>
+        <li>Рекомендуется сделать резервную копию текущей конфигурации перед внесением изменений</li>
+      </ul>
+    </div>
+  </div>
+</div>
+        
+        <div class="instruction-content-container">
+          <div class="instruction-tab-panel active" data-panel="mounting">
+            <div class="instruction-header">
+              <div class="instruction-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40">
+                  <path fill="#4CAF50" d="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,1 21,8V18A2,2 0 0,1 19,20M16.94,12.06L14.06,9.19L13,10.25L15.88,13.12L13,16L14.06,17.06L16.94,14.19L19.81,17.06L20.87,16L18,13.12L20.87,10.25L19.81,9.19L16.94,12.06Z"/>
+                </svg>
+              </div>
+              <h3>Монтирование разделов</h3>
+            </div>
+
+            <div class="instruction-content">
+              <div class="instruction-goal">
+                <h4>Цель</h4>
+                <p>Правильное монтирование разделов с учетом файловой системы, прав доступа и параметров монтирования</p>
+              </div>
+
+              <div class="instruction-requirements">
+                <h4>Требования</h4>
+                <ul>
+                  <li>Права суперпользователя (root)</li>
+                  <li>Знание типа файловой системы раздела</li>
+                  <li>UUID или метка раздела (опционально)</li>
+                </ul>
+              </div>
+
+              <div class="instruction-steps">
+                <h4>Шаг 1: Подготовка точки монтирования</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">mkdir -p /mount/point</div>
+                    <div class="command">chmod 755 /mount/point</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 2: Определение UUID раздела</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">blkid</div>
+                    <div class="command">lsblk -f</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 3: Временное монтирование</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">mount /dev/sdX1 /mount/point</div>
+                    <div class="command">mount UUID="your-uuid-here" /mount/point</div>
+                    <div class="command">mount -t ext4 -o defaults,noatime /dev/sdX1 /mount/point</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 4: Постоянное монтирование (fstab)</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">cp /etc/fstab /etc/fstab.backup</div>
+                    <div class="command">nano /etc/fstab</div>
+                    <div class="response"># Add to /etc/fstab:
+UUID=your-uuid-here  /mount/point  ext4  defaults,noatime  0  2</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 5: Проверка и применение</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">mount -a</div>
+                    <div class="command">df -h</div>
+                  </div>
+                </div>
+
+                <div class="instruction-special-cases">
+                  <h4>Специальные случаи</h4>
+                  
+                  <h5>Монтирование RAID массива</h5>
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="terminal-dot red"></div>
+                      <div class="terminal-dot yellow"></div>
+                      <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-output">
+                      <div class="command">mount /dev/md0 /mount/point</div>
+                    </div>
+                  </div>
+
+                  <h5>Монтирование зашифрованного раздела</h5>
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="terminal-dot red"></div>
+                      <div class="terminal-dot yellow"></div>
+                      <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-output">
+                      <div class="command">cryptsetup luksOpen /dev/sdX1 cryptname</div>
+                      <div class="command">mount /dev/mapper/cryptname /mount/point</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="instruction-notes">
+                  <h4>Важные замечания</h4>
+                  <ul>
+                    <li>Всегда создавайте резервную копию fstab перед внесением изменений</li>
+                    <li>Проверяйте права доступа к точке монтирования</li>
+                    <li>Используйте UUID вместо имен устройств для надежности</li>
+                    <li>После изменения fstab проверяйте корректность с помощью mount -a</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="instruction-tab-panel" data-panel="raid">
+            <div class="instruction-header">
+              <div class="instruction-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40">
+                  <path fill="#4CAF50" d="M2,2V22H22V2H2M20,20H4V4H20V20M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
+                </svg>
+              </div>
+              <h3>Настройка RAID1 для EFI раздела</h3>
+            </div>
+
+            <div class="instruction-content">
+              <div class="instruction-goal">
+                <h4>Цель</h4>
+                <p>Настройка отказоустойчивого EFI раздела с использованием RAID1 для повышения надежности загрузки системы</p>
+              </div>
+
+              <div class="instruction-requirements">
+                <h4>Требования</h4>
+                <ul>
+                  <li>Установленная система Debian</li>
+                  <li>Два или более диска с разметкой GPT</li>
+                  <li>Поддержка UEFI в BIOS</li>
+                  <li>Права суперпользователя (root)</li>
+                </ul>
+              </div>
+
+              <div class="instruction-steps">
+                <h4>Шаг 1: Подготовка системы</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">apt update</div>
+                    <div class="command">apt install mdadm efibootmgr</div>
+                    <div class="response">Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done</div>
+                  </div>
+                </div>
+
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">lsblk</div>
+                    <div class="command">fdisk -l</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 2: Создание RAID1 массива</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">mdadm --create --verbose /dev/md4 --level=1 --raid-devices=2 --metadata=1.0 /dev/sdb4 /dev/sdc4</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 3: Форматирование и монтирование RAID массива</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">mkfs.vfat /dev/md4</div>
+                    <div class="command">mkdir -p /boot/tmp</div>
+                    <div class="command">cp -a /boot/efi/* /boot/tmp/</div>
+                    <div class="command">umount /boot/efi</div>
+                    <div class="command">mount /dev/md4 /boot/efi</div>
+                    <div class="command">cp -a /boot/tmp/* /boot/efi/</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 4: Обновление конфигурации системы</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">lsblk -o +uuid</div>
+                    <div class="command">mcedit /etc/fstab</div>
+                    <div class="response">UUID=your-uuid-here /boot/efi vfat umask=0077 0 1</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 5: Настройка RAID конфигурации</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">mdadm --examine --scan | grep metadata=1.0 >> /etc/mdadm/mdadm.conf</div>
+                    <div class="command">update-initramfs -u</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 6: Настройка загрузчика</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">efibootmgr -v</div>
+                    <div class="command">efibootmgr -b XXXX -B</div>
+                    <div class="command">grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck /dev/sdb</div>
+                    <div class="command">grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck /dev/sdc</div>
+                    <div class="command">update-grub</div>
+                  </div>
+                </div>
+
+                <div class="instruction-special-cases">
+                  <h4>Проверка работоспособности</h4>
+                  
+                  <h5>1. Проверка статуса RAID</h5>
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="terminal-dot red"></div>
+                      <div class="terminal-dot yellow"></div>
+                      <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-output">
+                      <div class="command">cat /proc/mdstat</div>
+                      <div class="response">Personalities : [raid1] 
+md4 : active raid1 sdb4[0] sdc4[1]
+      976768 blocks super 1.0 [2/2] [UU]</div>
+                    </div>
+                  </div>
+
+                  <h5>2. Проверка монтирования</h5>
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="terminal-dot red"></div>
+                      <div class="terminal-dot yellow"></div>
+                      <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-output">
+                      <div class="command">mount | grep efi</div>
+                    </div>
+                  </div>
+
+                  <h5>3. Проверка загрузочных записей</h5>
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="terminal-dot red"></div>
+                      <div class="terminal-dot yellow"></div>
+                      <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-output">
+                      <div class="command">efibootmgr -v</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="instruction-notes">
+                  <h4>Важные замечания</h4>
+                  <ul>
+                    <li>Всегда делайте резервную копию данных перед работой с разделами</li>
+                    <li>Проверяйте UUID разделов перед добавлением в fstab</li>
+                    <li>Убедитесь, что оба диска поддерживают GPT и UEFI</li>
+                    <li>После настройки проверьте загрузку с каждого диска</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="instruction-tab-panel" data-panel="psql">
+            <div class="instruction-header">
+              <div class="instruction-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40">
+                  <path fill="#4CAF50" d="M4,1H20A1,1 0 0,1 21,2V6A1,1 0 0,1 20,7H4A1,1 0 0,1 3,6V2A1,1 0 0,1 4,1M4,9H20A1,1 0 0,1 21,10V14A1,1 0 0,1 20,15H4A1,1 0 0,1 3,14V10A1,1 0 0,1 4,9M4,17H20A1,1 0 0,1 21,18V22A1,1 0 0,1 20,23H4A1,1 0 0,1 3,22V18A1,1 0 0,1 4,17Z"/>
+              </svg>
+              </div>
+              <h3>Перенос данных PostgreSQL</h3>
+            </div>
+
+            <div class="instruction-content">
+              <div class="instruction-goal">
+                <h4>Цель</h4>
+                <p>Переместить данные PostgreSQL с текущего расположения (/var/lib/postgresql) на отдельный RAID-массив /store для оптимизации производительности и освобождения места на других дисках.</p>
+              </div>
+
+              <div class="instruction-requirements">
+                <h4>Требования</h4>
+                <ul>
+                  <li>Права суперпользователя (root)</li>
+                  <li>Установленный и настроенный PostgreSQL 17</li>
+                  <li>Смонтированный раздел /store</li>
+                  <li>Достаточно свободного места на /store</li>
+                </ul>
+              </div>
+
+              <div class="instruction-steps">
+                <h4>Шаг 1: Остановка службы PostgreSQL</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">systemctl stop postgresql</div>
+                    <div class="response"># Дождитесь полной остановки службы</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 2: Создание новой директории</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">mkdir -p /store/pgdata</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 3: Копирование данных</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">rsync -av /var/lib/postgresql/17/main/ /store/pgdata/</div>
+                    <div class="response">sending incremental file list
+./
+base/
+global/
+pg_wal/
+...</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 4: Настройка прав доступа</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">chown -R postgres:postgres /store/pgdata</div>
+                    <div class="command">chmod 700 /store/pgdata</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 5: Обновление конфигурации</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">nano /etc/postgresql/17/main/postgresql.conf</div>
+                    <div class="response">data_directory = '/store/pgdata'</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 6: Запуск службы</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">systemctl start postgresql</div>
+                  </div>
+                </div>
+
+                <div class="instruction-special-cases">
+                  <h4>Проверка успешности переноса</h4>
+                  
+                  <h5>1. Проверка расположения данных</h5>
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="terminal-dot red"></div>
+                      <div class="terminal-dot yellow"></div>
+                      <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-output">
+                      <div class="command">ls -l /store/pgdata</div>
+                      <div class="response">drwx------ postgres postgres ... base
+drwx------ postgres postgres ... global
+drwx------ postgres postgres ... pg_wal
+...</div>
+                    </div>
+                  </div>
+
+                  <h5>2. Проверка подключения к PostgreSQL</h5>
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="terminal-dot red"></div>
+                      <div class="terminal-dot yellow"></div>
+                      <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-output">
+                      <div class="command">sudo -u postgres psql -c "SELECT 1;"</div> 
+                      <div class="response"> ?column? 
+----------
+        1
+(1 row)</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="instruction-notes">
+                  <h4>Важные замечания</h4>
+                  <ul>
+                    <li>Обязательно создайте резервную копию данных перед началом переноса</li>
+                    <li>Убедитесь, что на /store достаточно места для данных PostgreSQL</li>
+                    <li>Проверьте, что служба PostgreSQL имеет необходимые права доступа к новому расположению</li>
+                    <li>После переноса рекомендуется создать резервную копию новой конфигурации</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="instruction-tab-panel" data-panel="php">
+            <div class="instruction-header">
+              <div class="instruction-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40">
+                  <path fill="#4CAF50" d="M13,9H18.5L13,3.5V9M16,5H8V11H16V5M11,10V14H13V10M11,16V18H13V16M11,19V21H13V19M9,11H15V9H9V11Z"/>
+                </svg>
+              </div>
+              <h3>Настройка параметров PHP-FPM (PHP 8.2)</h3>
+            </div>
+            
+            <div class="instruction-content">
+              <div class="instruction-goal">
+                <h4>Цель</h4>
+                <p>Изменение ключевых параметров PHP-FPM для оптимизации работы веб-приложений, в том числе Zabbix</p>
+              </div>
+
+              <div class="instruction-requirements">
+                <h4>Изменяемые параметры</h4>
+                <ul>
+                  <li>post_max_size = 16M (максимальный размер данных POST-запроса)</li>
+                  <li>upload_max_filesize = 2M (максимальный размер загружаемых файлов)</li>
+                  <li>max_execution_time = 300 (максимальное время выполнения скрипта)</li>
+                  <li>max_input_time = 300 (максимальное время для приема входных данных)</li>
+                </ul>
+              </div>
+
+              <div class="instruction-steps">
+                <h4>Шаг 1: Определение пути к php.ini</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">php --ini | grep "Loaded Configuration File"</div>
+                    <div class="response">Loaded Configuration File: /etc/php/8.2/fpm/php.ini</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 2: Создание резервной копии</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo cp /etc/php/8.2/fpm/php.ini /etc/php/8.2/fpm/php.ini.bak</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 3: Редактирование php.ini</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo nano /etc/php/8.2/fpm/php.ini</div>
+                    <pre style="color: #4caf50">
+post_max_size = 16M
+upload_max_filesize = 2M
+max_execution_time = 300
+max_input_time = 300</pre>
+                  </div>
+                </div>
+
+                <h4>Шаг 4: Проверка конфигурации пула</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo nano /etc/php/8.2/fpm/pool.d/www.conf</div>
+                    <pre style="color: #4caf50">
+# Удалите или измените, если найдете:
+php_admin_value[post_max_size] = ...
+php_admin_value[upload_max_filesize] = ...
+php_admin_value[max_execution_time] = ...
+php_admin_value[max_input_time] = ...</pre>
+                  </div>
+                </div>
+
+                <h4>Шаг 5: Перезапуск PHP-FPM</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo systemctl restart php8.2-fpm</div>
+                  </div>
+                </div>
+
+                <div class="instruction-special-cases">
+                  <h4>Проверка изменений</h4>
+                  
+                  <h5>1. Проверка значений параметров</h5>
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="terminal-dot red"></div>
+                      <div class="terminal-dot yellow"></div>
+                      <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-output">
+                      <div class="command">grep -E "^(post_max_size|upload_max_filesize|max_execution_time|max_input_time)" /etc/php/8.2/fpm/php.ini</div>
+                      <pre style="color: #4caf50">post_max_size = 16M
+upload_max_filesize = 2M
+max_execution_time = 300
+max_input_time = 300</pre>
+                    </div>
+                  </div>
+
+                  <h5>2. Проверка статуса службы PHP-FPM</h5>
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="terminal-dot red"></div>
+                      <div class="terminal-dot yellow"></div>
+                      <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-output">
+                      <div class="command">systemctl status php8.2-fpm</div>
+                      <pre style="color: #4caf50">● php8.2-fpm.service - The PHP 8.2 FastCGI Process Manager
+   Active: active (running)</pre>
+                    </div>
+                  </div>
+
+                  <h5>3. Проверка через веб-интерфейс</h5>
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="terminal-dot red"></div>
+                      <div class="terminal-dot yellow"></div>
+                      <div class="terminal-dot green"></div>
+                    </div>
+                    <div class="terminal-output">
+                      <div class="command">echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php</div>
+                      <div class="command">sudo rm /var/www/html/info.php</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="instruction-notes">
+                  <h4>Важные замечания</h4>
+                  <ul>
+                    <li>Значение post_max_size должно быть больше или равно upload_max_filesize</li>
+                    <li>После изменения параметров рекомендуется проверить работу веб-приложений</li>
+                    <li>При необходимости можно восстановить настройки из резервной копии</li>
+                    <li>Не забудьте удалить файл info.php после проверки настроек</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="instruction-tab-panel" data-panel="mysql">
+            <div class="instruction-header">
+              <div class="instruction-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40">
+                  <path fill="#4CAF50" d="M17,7H7A2,2 0 0,0 5,9V15A2,2 0 0,0 7,17H17A2,2 0 0,0 19,15V9A2,2 0 0,0 17,7M16.94,12.06L14.06,9.19L13,10.25L15.88,13.12L13,16L14.06,17.06L16.94,14.19L19.81,17.06L20.87,16L18,13.12L20.87,10.25L19.81,9.19L16.94,12.06Z"/>
+                </svg>
+              </div>
+              <h3>Включение устаревшего плагина аутентификации MySQL</h3>
+            </div>
+            
+            <div class="instruction-content">
+              <div class="instruction-goal">
+                <h4>Цель</h4>
+                <p>Включение плагина аутентификации mysql_native_password в MySQL 8.4.0 для совместимости с legacy-приложениями</p>
+              </div>
+
+              <div class="instruction-requirements">
+                <h4>Требования</h4>
+                <ul>
+                  <li>MySQL 8.4.0</li>
+                  <li>Права суперпользователя (root)</li>
+                </ul>
+              </div>
+
+              <div class="instruction-steps">
+                <h4>Шаг 1: Настройка параметров MySQL</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf</div>
+                    <div class="response">[mysqld]
+mysql-native-password=ON</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 2: Перезапуск MySQL</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo systemctl restart mysql</div></div>
+                </div>
+
+                <h4>Шаг 3: Проверка статуса плагина</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo mysql -e "SELECT user, plugin FROM mysql.user WHERE user = 'root';"</div> 
+                    <div class="response">+------+-----------------------+
+| user | plugin                |
++------+-----------------------+
+| root | mysql_native_password |
++------+-----------------------+</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 4: Перезапуск зависимых служб</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo systemctl restart php7.4-fpm</div>
+                    <div class="command">sudo systemctl restart mysql</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="instruction-notes">
+                <h4>Важные замечания</h4>
+                <ul>
+                  <li>Перед редактированием конфигурации создайте резервную копию файла</li>
+                  <li>Убедитесь, что клиентские приложения совместимы</li>
+                  <li>Проверьте работу всех сервисов после изменения настроек</li>
+                  <li>Рассмотрите возможность миграции на более безопасные методы аутентификации</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="instruction-tab-panel" data-panel="shell">
+            <div class="instruction-header">
+              <div class="instruction-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40">
+                  <path fill="#4CAF50" d="M3,4A2,2 0 0,0 1,6V18A2,2 0 0,0 3,20H21A2,2 0 0,0 23,18V6A2,2 0 0,0 21,4H3M3,6H21V18H3V6Z"/>
+                </svg>
+              </div>
+              <h3>Создание интерактивной оболочки гостевого пользователя sphera</h3>
+            </div>
+            
+            <div class="instruction-content">
+              <div class="instruction-goal">
+                <h4>Цель</h4>
+                <p>Настроить автоматический запуск интерактивного скрипта меню <code>startscript.sh</code> при входе пользователя <code>sphera</code> в систему, предоставляя гостевому пользователю ограниченный набор функций через интерактивную оболочку.</p>
+              </div>
+
+              <div class="instruction-requirements">
+                <h4>Требования</h4>
+                <ul>
+                  <li>Права суперпользователя (root)</li>
+                  <li>Существующий пользователь с именем <code>sphera</code> в системе</li>
+                  <li>Интерактивный скрипт меню <code>startscript.sh</code>, расположенный по пути <code>/usr/local/bin/startscript.sh</code></li>
+                </ul>
+              </div>
+
+              <div class="instruction-steps">
+                <h4>Шаг 1: Изменение файла .bashrc пользователя sphera</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo nano /home/sphera/.bashrc</div>
+                    <div class="command">
+                      <pre># Запуск скрипта startscript.sh при входе пользователя sphera
+if [ "$USER" = "sphera" ]; then
+  sudo /usr/local/bin/startscript.sh
+fi</pre>
+                    </div>
+                  </div>
+                </div>
+
+                <h4>Шаг 2: Настройка прав sudoers для запуска скрипта без пароля</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo nano /etc/sudoers.d/sphera</div>
+                    <div class="command">
+                      <pre>sphera ALL=(ALL) NOPASSWD: /usr/local/bin/startscript.sh</pre>
+                    </div>
+                  </div>
+                </div>
+
+                <h4>Шаг 3: Проверка прав на выполнение скрипта startscript.sh</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo chmod +x /usr/local/bin/startscript.sh</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 4: Дополнительные права sudoers для скрипта (опционально)</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo nano /etc/sudoers.d/sphera</div>
+                    <div class="command">
+                      <pre>sphera ALL=(ALL:ALL) NOPASSWD: /usr/bin/lsof, /usr/bin/kill</pre>
+                    </div>
+                  </div>
+                </div>
+
+                <h4>Шаг 5: Обновление скрипта startscript.sh (при необходимости)</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo nano /usr/local/bin/startscript.sh</div>
+                    <div class="command">
+                      <pre>#!/bin/bash
+PS3="Выберите действие: "
+options=("Просмотр информации о системе" "Проверка сетевого соединения" "Выход")
+select opt in "${options[@]}"; do
+case $opt in
+"Просмотр информации о системе") uname -a ;;
+"Проверка сетевого соединения") ping -c 3 google.com ;;
+"Выход") break ;;
+*) echo "Неверный пункт меню";;
+esac
+done</pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="instruction-notes">
+                <h4>Важные замечания</h4>
+                <ul>
+                  <li>Предоставление пользователю права на запуск команд sudo без пароля может снизить безопасность системы.</li>
+                  <li>Убедитесь, что скрипт <code>/usr/local/bin/startscript.sh</code> надежен и не содержит уязвимостей.</li>
+                  <li>Рассмотрите возможность предоставления более ограниченных прав, если это возможно.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="instruction-tab-panel" data-panel="sql">
+            <div class="instruction-header">
+              <div class="instruction-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40">
+                  <path fill="#4CAF50" d="M5,20H19V18H5V20M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                </svg>
+              </div>
+              <h3>Импорт SQL-файлов для Asterisk</h3>
+            </div>
+            
+            <div class="instruction-content">
+              <div class="instruction-goal">
+                <h4>Цель</h4>
+                <p>Импорт SQL-дампов в базы данных MySQL, используемые Asterisk, для восстановления данных или начальной настройки</p>
+              </div>
+
+              <div class="instruction-steps">
+                <h4>Шаг 1: Импорт SQL-дампов в MySQL</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">mysql -u root DBLicence < /root/install_ks/pack/DBlicence.sql</div>
+                    <div class="command">mysql -u root asterisk < /root/install_ks/pack/asterisk.sql</div>
+                    <div class="response">Query OK, 23 rows affected (0.15 sec)
+Records: 23  Deleted: 0  Skipped: 0  Warnings: 0</div>
+                  </div>
+                </div>
+
+                <h4>Шаг 2: Проверка импортированных таблиц</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">mysql -u root -e "USE DBlicence; SHOW TABLES;"</div>
+                    <pre style="color: #4caf50">+----------------------+
+| Tables_in_DBlicence |
++----------------------+
+| licenses             |
+| users                |
++----------------------+</pre>
+                    <div class="command">mysql -u root -e "USE asterisk; SHOW TABLES;"</div>
+                    <pre style="color: #4caf50">+---------------------+
+| Tables_in_asterisk |
++---------------------+
+| extensions          |
+| calls               |
+| voicemail           |
++---------------------+</pre>
+                  </div>
+                </div>
+              </div>
+
+              <div class="instruction-notes">
+                <h4>Важные замечания</h4>
+                <ul>
+                  <li>Перед импортом убедитесь в корректности путей к SQL-файлам</li>
+                  <li>Рекомендуется создавать резервные копии баз данных перед импортом</li>
+                  <li>Проверьте соответствие версий SQL-дампов текущей структуре баз данных</li>
+                  <li>В production-средах используйте пользователя с ограниченными правами вместо root</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="instruction-tab-panel" data-panel="kms">
+            <div class="instruction-header">
+              <div class="instruction-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40">
+                  <path fill="#4CAF50" d="M21,16V4H3V16H21M21,2A2,2 0 0,1 23,4V16A2,2 0 0,1 21,18H14V20H16V22H8V20H10V18H3A2,2 0 0,1 1,16V4A2,2 0 0,1 3,2H21Z"/>
+                </svg>
+              </div>
+              <h3>Настройка KMS (Kernel Mode Setting) для Intel</h3>
+            </div>
+            
+            <div class="instruction-content">
+              <div class="instruction-goal">
+                <h4>Цель</h4>
+                <p>Настройка Kernel Mode Setting для корректной работы видеовывода Intel в Linux</p>
+              </div>
+
+              <div class="instruction-requirements">
+                <h4>Требования</h4>
+                <ul>
+                  <li>Видеокарта Intel</li>
+                  <li>Права root</li>
+                  <li>Текстовый редактор (nano/vim)</li>
+                </ul>
+              </div>
+
+              <div class="instruction-steps">
+                <h4>Шаг 1: Редактирование конфигурации GRUB</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo nano /etc/default/grub</div>
+                    <pre style="color: #4caf50"># Найдите строку:
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+
+# Измените её на:
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash i915.modeset=1"</pre>
+                  </div>
+                </div>
+
+                <h4>Шаг 2: Обновление конфигурации GRUB</h4>
+                <div class="terminal-container">
+                  <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                  </div>
+                  <div class="terminal-output">
+                    <div class="command">sudo update-grub</div>
+                  </div>
+                </div>
+
+                <div class="instruction-special-cases">
+                  <h4>Как работает KMS vs VBE</h4>
+                  
+                  <h5>VBE (Video BIOS Extensions)</h5>
+                  <div style="background: rgba(0,0,0,0.02); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                    <ul style="list-style-type: disc; padding-left: 1.5rem;">
+                      <li>BIOS/UEFI использует VBE для базовой настройки экрана</li>
+                      <li>Устаревшая технология</li>
+                      <li>Может "забыть" о видеовыводе при отсутствии монитора</li>
+                      <li>Редко поддерживается современными видеокартами</li>
+                    </ul>
+                  </div>
+
+                  <h5>KMS (Kernel Mode Setting)</h5>
+                  <div style="background: rgba(0,0,0,0.02); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                    <ul style="list-style-type: disc; padding-left: 1.5rem;">
+                      <li>Ядро Linux напрямую управляет видеокартой</li>
+                      <li>Сохраняет конфигурацию даже при отключении монитора</li>
+                      <li>Автоматически активирует видеовывод при подключении</li>
+                      <li>Работает со всеми современными видеокартами</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="instruction-notes">
+                  <h4>Совместимость</h4>
+                  <ul>
+                    <li>Intel: Параметр i915.modeset=1 работает со всеми современными картами</li>
+                    <li>NVIDIA: Использует драйвер nouveau, параметр не применяется</li>
+                    <li>AMD: Использует драйвер amdgpu, параметр не применяется</li>
+                    <li>Гибридная графика: Параметр работает только для Intel-части</li>
+                  </ul>
+                </div>
+
+                <div class="instruction-notes" style="margin-top: 1rem;">
+                  <h4>Почему KMS лучше?</h4>
+                  <ul>
+                    <li>Работает со всеми современными видеокартами</li>
+                    <li>Не зависит от BIOS/VBE</li>
+                    <li>Более стабильное и надёжное управление графикой</li>
+                    <li>Поддерживает горячее подключение мониторов</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="bios">
+      <h2>Настройка BIOS</h2>
+      <div class="section-container">
+        <div class="bios-interface">
+          <div class="bios-header">
+            American Megatrends BIOS Setup Utility
+            <span class="bios-version">Version 2.15.1246</span>
+          </div>
+          
+          <div class="bios-menu">
+            <!-- TPM Settings -->
+            <div class="bios-menu-item active">
+              <div class="bios-menu-header">
+                <svg class="bios-icon" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="#00ff00" d="M12,17C10.89,17 10,16.1 10,15C10,13.89 10.89,13 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M18,20V10H6V20H18M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10C4,8.89 4.89,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"/>
+                </svg>
+              </div>
+              <div class="bios-menu-content">
+                <div class="bios-setting">
+                  <div class="setting-path">BIOS → Security → TPM Support</div>
+                  <div class="setting-value">[Enabled]</div>
+                  <div class="setting-description">
+                    Микрочип TPM обеспечивает аппаратную безопасность системы, храня криптографические ключи и сертификаты.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CSM Settings -->
+            <div class="bios-menu-item">
+              <div class="bios-menu-header">
+                <svg class="bios-icon" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="#00ff00" d="M7,2V13H10V22L17,10H13L17,2H7Z"/>
+                </svg>
+              </div>
+              <div class="bios-menu-content">
+                <div class="bios-setting">
+                  <div class="setting-path">BIOS → Boot → CSM Settings</div>
+                  <div class="setting-value">[Disabled]</div>
+                  <div class="setting-description">
+                    CSM (Compatibility Support Module) - режим совместимости с устаревшими системами.
+                  </div>
+                  <div class="setting-notes">
+                    <ul>
+                      <li>Поддержка GPT для работы с дисками объемом более 2 ТБ</li>
+                      <li>Ускоренная загрузка благодаря оптимизированной архитектуре UEFI</li>
+                      <li>Некоторые функции TPM, такие как Measured Boot, требуют чистого UEFI-режима без участия CSM</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- VT-d Settings -->
+            <div class="bios-menu-item">
+              <div class="bios-menu-header">
+                <svg class="bios-icon" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="#00ff00" d="M12,3L1,9L12,15L21,10.09V17H23V9M5,13.18V17.18L12,21L19,17.18V13.18L12,17L5,13.18Z"/>
+                </svg>
+              </div>
+              <div class="bios-menu-content">
+                <div class="bios-setting">
+                  <div class="setting-path">BIOS → Advanced → Chipset Configuration</div>
+                  <div class="setting-value">[Disabled]</div>
+                  <div class="setting-description">
+                    Intel VT-d (Virtualization Technology for Directed I/O) - технология виртуализации прямого ввода-вывода.
+                  </div>
+                  <div class="setting-notes">
+                    Отключение VT-d помогает избежать конфликтов с драйверами ядра Linux при использовании RAID и шифрования.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- USB Storage Settings -->
+            <div class="bios-menu-item">
+              <div class="bios-menu-header">
+                <svg class="bios-icon" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="#00ff00" d="M15,7H7A2,2 0 0,0 5,9V15A2,2 0 0,0 7,17H17A2,2 0 0,0 19,15V9A2,2 0 0,0 17,7H15M16,5H8V11H6V13H4V15H20V13H18V11H16V5M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2Z"/>
+                </svg>
+              </div>
+              <div class="bios-menu-content">
+                <div class="bios-setting">
+                  <div class="setting-path">BIOS → Boot → USB Settings</div>
+                  <div class="setting-value">[Enabled]</div>
+                  <div class="setting-description">
+                    USB Mass Storage Driver Support - эта опция позволяет BIOS/UEFI распознавать USB-накопители (флешки, внешние жесткие диски) как загрузочные устройства.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Network Settings -->
+            <div class="bios-menu-item">
+              <div class="bios-menu-header">
+                <svg class="bios-icon" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="#00ff00" d="M17,3A2,2 0 0,1 19,5V15A2,2 0 0,1 17,17H13V19H14A1,1 0 0,1 15,20H22V22H15A1,1 0 0,1 14,23H10A1,1 0 0,1 9,22H2V20H9A1,1 0 0,1 10,19H11V17H13V19H18M7,13.18V17.18L12,21L19,17.18V13.18L12,17L7,13.18Z"/>
+                </svg>
+              </div>
+              <div class="bios-menu-content">
+                <div class="bios-setting">
+                  <div class="setting-path">BIOS → Advanced → Network Settings</div>
+                  <div class="setting-value">[Disabled]</div>
+                  <div class="setting-description">
+                    Disqualify GBE Disconnect and ModPHY PG:
+                  </div>
+                  <div class="setting-notes">
+                    <ul>
+                      <li>Disconnect: Определяет, как система реагирует на разрыв соединения в сети</li>
+                      <li>ModPHY PG: Управляет режимом питания физического слоя сетевого адаптера (PHY), позволяя экономить энергию, когда адаптер неактивен</li>
+                      <li>Отключайте, если вы сталкиваетесь с проблемами подключения или стабильности работы сетевого адаптера</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cache Configuration -->
+            <div class="bios-menu-item">
+              <div class="bios-menu-header">
+                <svg class="bios-icon" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="#00ff00" d="M12,3L1,9L12,15L21,10.09V17H23V9M5,13.18V17.18L12,21L19,17.18V13.18L12,17L5,13.18Z"/>
+                </svg>
+              </div>
+              <div class="bios-menu-content">
+                <div class="bios-setting">
+                  <div class="setting-path">BIOS → Advanced → Cache Settings</div>
+                  <div class="setting-value">[Disabled]</div>
+                  <div class="setting-description">
+                    Adjacent Cache Line Prefetcher: полезно для последовательного доступа к памяти, можно отключить
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACPI Configuration -->
+            <div class="bios-menu-item">
+              <div class="bios-menu-header">
+                <svg class="bios-icon" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="#00ff00" d="M7,2V13H10V22L17,10H13L17,2H7Z"/>
+                </svg>
+              </div>
+              <div class="bios-menu-content">
+                <div class="bios-setting">
+                  <div class="setting-path">BIOS → Advanced → ACPI Settings</div>
+                  <div class="setting-value">[Enabled]</div>
+                  <div class="setting-description">
+                    ACPI (Advanced Configuration and Power Interface) — это стандарт, который позволяет операционной системе управлять питанием и конфигурацией оборудования.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="bios-footer">
+            <div class="bios-keys">
+              <span class="key">↑↓</span> Select Item
+              <span class="key">Enter</span> Select
+              <span class="key">Esc</span> Exit
+              <span class="key">F10</span> Save & Exit
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script src="script.js"></script>
+  </main>
+</body>
+</html>
